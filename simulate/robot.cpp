@@ -13,7 +13,7 @@ void Robot::moveCamera(int action, mjtNum reldx, mjtNum reldy)
 
 void Robot::step()
 {
-    d->ctrl[0] = 1;
+    std::lock_guard<std::mutex> lock(sim_mtx);
     mj_step(m, d);
 }
 

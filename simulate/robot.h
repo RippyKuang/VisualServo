@@ -3,6 +3,7 @@
 #include <cstring>
 #include <iostream>
 #include <thread>
+#include <mutex>
 
 #include <opencv2/opencv.hpp>
 
@@ -18,6 +19,8 @@ private:
 
     mjvOption opt;
     mjvScene scn;
+
+    std::mutex sim_mtx;
 
 public:
     Robot(const char *path)
@@ -53,12 +56,18 @@ public:
     void step();
     void updateScene(mjrRect viewport, mjrContext &con)
     {
-        mjv_updateScene(m, d, &opt, NULL, &cam, mjCAT_ALL, &scn);
+        {
+            std::lock_guard<std::mutex> lock(sim_mtx);
+            mjv_updateScene(m, d, &opt, NULL, &cam, mjCAT_ALL, &scn);
+        }
         mjr_render(viewport, &scn, &con);
     }
     void updateCamera(mjrRect viewport, mjrContext &con, mjvCamera &c)
     {
-        mjv_updateCamera(m, d, &c, &scn);
+        {
+            std::lock_guard<std::mutex> lock(sim_mtx);
+            mjv_updateCamera(m, d, &c, &scn);
+        }
         mjr_render(viewport, &scn, &con);
     }
     void createCamera(mjvCamera &cam, const char *cam_name, int type = mjCAMERA_FIXED)
