@@ -2,13 +2,15 @@
 
 int main(int argc, const char **argv)
 {
-    if (argc != 2)
-    {
-        std::cerr << "Usage: " << argv[0] << " <model.xml>" << std::endl;
-        return -1;
-    }
-
+  
     Simulate simulate(argv[1]);
+    cv::Mat image;
 
+    while (1)
+    {
+        simulate.getImage(image);
+        cv::imshow("Camera View", image);
+        cv::waitKey(1);
+    }
     return 0;
 }

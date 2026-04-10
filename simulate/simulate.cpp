@@ -56,12 +56,7 @@ void Simulate::simThread()
     window->setWindowUserPointer(this);
     window->registerCallbacks();
 
-    const mjrRect camview = {0, 0, 640, 480};
-
-    unsigned char *rgbBuffer = new unsigned char[camview.width * camview.height * 3];
-    float *depthBuffer = new float[camview.width * camview.height];
-
-    std::thread physic_thread(&Simulate::physicThread, this);
+    physic_thread = std::thread(&Simulate::physicThread, this);
 
     while (!window->shouldClose())
     {
@@ -75,32 +70,26 @@ void Simulate::simThread()
 
         robot->updateCamera(camview, mainCon, cam);
 
-        mjr_readPixels(rgbBuffer, depthBuffer, camview, &mainCon);
-        cv::Mat image(camview.height, camview.width, CV_8UC3, rgbBuffer);
-
-        cv::flip(image, image, 0);
-
-        cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
-        cv::imshow("CamView", image);
-        cv::waitKey(1);
+        {
+            std::lock_guard<std::mutex> lock(buffer_mtx);
+            mjr_readPixels(imgBuffer, NULL, camview, &mainCon);
+            frame_ready = true; 
+            cr.notify_all();
+        }
 
         glfwPollEvents();
     }
-
-    delete[] rgbBuffer;
-    delete[] depthBuffer;
-    physic_thread.join();
 }
 
 void Simulate::physicThread()
 {
     while (!window->shouldClose())
     {
-    
+
         auto step_start = std::chrono::high_resolution_clock::now();
 
         robot->step();
-        
+
         auto current_time = std::chrono::high_resolution_clock::now();
         double elapsed_sec =
             std::chrono::duration<double>(current_time - step_start).count();

@@ -31,7 +31,7 @@ public:
         glfwInit();
         window = glfwCreateWindow(1024, 768, "Demo", NULL, NULL);
         glfwMakeContextCurrent(window);
-        glfwSwapInterval(1);
+      //  glfwSwapInterval(1);
     }
     ~Window();
 
