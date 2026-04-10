@@ -30,7 +30,7 @@ public:
         char error[1000] = "Could not load binary model";
         m = mj_loadXML(path, nullptr, error, 1000);
         if (!m)
-            mju_error("加载模型失败: %s", error);
+            mju_error("failed to load model: %s", error);
 
         d = mj_makeData(m);
 
