@@ -29,11 +29,9 @@ public:
     Window()
     {
         glfwInit();
-        window = glfwCreateWindow(1200, 900, "Demo", NULL, NULL);
+        window = glfwCreateWindow(1024, 768, "Demo", NULL, NULL);
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1);
-
-       
     }
     ~Window();
 

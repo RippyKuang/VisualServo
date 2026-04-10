@@ -7,6 +7,7 @@ class Simulate
 {
 private:
     void simThread();
+
     std::thread sim_thread;
     const char *modelPath;
 

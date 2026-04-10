@@ -67,7 +67,7 @@
                   <inertial pos="0.0241569 -0.00017355 -0.00143876" quat="0.998779 0.0457735 -0.00663717 0.0173548"
                     mass="0.288758" diaginertia="0.00018333 0.000147464 0.000146786"/>
                   <joint name="joint6" axis="1 0 0" range="-2.79253 2.79253"/>
-                  <camera name="camera" mode = "fixed" pos="0.06 0 0" euler="1.570796326794 -1.5707963267949 0" fovy="54.225"/>
+                  <camera name="endCamera" mode = "fixed" pos="0.06 0 0" euler="1.570796326794 -1.5707963267949 0" fovy="54.225"/>
                   <geom class="visual" mesh="z1_Link06"/>
                   <geom size="0.0325 0.0255" pos="0.0255 0 0" quat="1 0 1 0" class="collision"/>
                 </body>

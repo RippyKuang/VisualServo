@@ -44,34 +44,51 @@ void Window::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 void Simulate::simThread()
 {
 
-    window = std::make_unique<Window>();
     robot = std::make_unique<Robot>(modelPath);
+    window = std::make_unique<Window>(); 
+
+
+    GLFWwindow* camView = glfwCreateWindow(640, 480, "End Effector Camera", NULL, NULL);
+  
+
+    mjrContext mainCon, camCon;
+    mjvCamera cam; 
+
+    
+    glfwMakeContextCurrent(window->getWindow());
+    robot->makeContext(mainCon); 
+
+    
+    glfwMakeContextCurrent(camView);
+    robot->makeContext(camCon);
+    robot->createCamera(cam, "endCamera"); 
 
     window->setWindowUserPointer(this);
     window->registerCallbacks();
 
-    auto step_start = std::chrono::high_resolution_clock::now();
-    while (!window->shouldClose())
+    while (!window->shouldClose() && !glfwWindowShouldClose(camView))
     {
-
+        
         robot->step();
 
-        auto current_time = std::chrono::high_resolution_clock::now();
-        double elapsed_sec =
-            std::chrono::duration<double>(current_time - step_start).count();
-        double time_until_next_step = 0.002 * 5 - elapsed_sec;
-        if (time_until_next_step > 0.0)
-        {
-            auto sleep_duration = std::chrono::duration<double>(time_until_next_step);
-            std::this_thread::sleep_for(sleep_duration);
-        }
-
+        glfwMakeContextCurrent(window->getWindow()); 
         mjrRect viewport = {0, 0, 0, 0};
         window->getFramebufferSize(&viewport.width, &viewport.height);
-
-        robot->update(viewport);
-
+      
+        robot->updateScene(viewport, mainCon); 
         glfwSwapBuffers(window->getWindow());
+
+     
+        glfwMakeContextCurrent(camView); 
+        glfwGetFramebufferSize(camView, &viewport.width, &viewport.height);
+        
+     
+        robot->updateCamera(viewport, camCon,cam); 
+        glfwSwapBuffers(camView);
+
         glfwPollEvents();
+        
+      
     }
 }
+
