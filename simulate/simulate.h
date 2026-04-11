@@ -9,8 +9,13 @@
 
 #define TIMESTEP 0.002
 
+typedef std::chrono::_V2::system_clock::time_point time_point;
+typedef std::chrono::high_resolution_clock Clock;
+
 class Simulate
 {
+    friend class robot;
+    friend class Window;
 private:
     void simThread();
     void physicThread();
@@ -20,17 +25,19 @@ private:
 
     const char *modelPath;
     const mjrRect camview = {0, 0, 640, 480};
-    
+
     std::mutex buffer_mtx;
     std::condition_variable cr;
     bool frame_ready = false;
 
     uint8_t *imgBuffer;
 
-public:
+protected:
+
     std::unique_ptr<Robot> robot;
     std::unique_ptr<Window> window;
 
+public:
     Simulate(const char *path) : modelPath(path)
     {
         sim_thread = std::thread(&Simulate::simThread, this);

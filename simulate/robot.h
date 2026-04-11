@@ -12,15 +12,17 @@ std::string getExecutableDir();
 
 class Robot
 {
+
 private:
-    mjModel *m = NULL;
-    mjData *d = NULL;
     mjvCamera cam;
 
     mjvOption opt;
     mjvScene scn;
 
     std::mutex sim_mtx;
+
+    mjModel *m = NULL;
+    mjData *d = NULL;
 
 public:
     Robot(const char *path)
@@ -35,8 +37,6 @@ public:
         d = mj_makeData(m);
 
         int endCameraID = mj_name2id(m, mjOBJ_CAMERA, "endCamera");
-        if (endCameraID == -1)
-            std::cerr << "Camera not found" << std::endl;
 
         mjv_defaultCamera(&cam);
         mjv_defaultOption(&opt);
@@ -52,31 +52,19 @@ public:
         mj_deleteModel(m);
     }
 
+    const mjData *getDataHandle()
+    {
+        return d;
+    }
+
     void resetRobot();
     void step();
-    void updateScene(mjrRect viewport, mjrContext &con)
-    {
-        {
-            std::lock_guard<std::mutex> lock(sim_mtx);
-            mjv_updateScene(m, d, &opt, NULL, &cam, mjCAT_ALL, &scn);
-        }
-        mjr_render(viewport, &scn, &con);
-    }
-    void updateCamera(mjrRect viewport, mjrContext &con, mjvCamera &c)
-    {
-        {
-            std::lock_guard<std::mutex> lock(sim_mtx);
-            mjv_updateCamera(m, d, &c, &scn);
-        }
-        mjr_render(viewport, &scn, &con);
-    }
-    void createCamera(mjvCamera &cam, const char *cam_name, int type = mjCAMERA_FIXED)
-    {
-        int camID = mj_name2id(m, mjOBJ_CAMERA, cam_name);
-        mjv_defaultCamera(&cam);
-        cam.fixedcamid = camID;
-        cam.type = type;
-    }
+    void updateScene(mjrRect viewport, mjrContext &con);
+
+    void updateCamera(mjrRect viewport, mjrContext &con, mjvCamera &c);
+
+    void createCamera(mjvCamera &cam, const char *cam_name, int type = mjCAMERA_FIXED);
+
     void moveCamera(int action, mjtNum reldx, mjtNum reldy);
     void makeContext(mjrContext &con);
 };

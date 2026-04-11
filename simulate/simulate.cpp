@@ -73,7 +73,7 @@ void Simulate::simThread()
         {
             std::lock_guard<std::mutex> lock(buffer_mtx);
             mjr_readPixels(imgBuffer, NULL, camview, &mainCon);
-            frame_ready = true; 
+            frame_ready = true;
             cr.notify_all();
         }
 
@@ -83,22 +83,20 @@ void Simulate::simThread()
 
 void Simulate::physicThread()
 {
+    const mjData *d = robot->getDataHandle();
+
+    time_point cpu_start = Clock::now();
+    mjtNum sim_start = d->time;
+
     while (!window->shouldClose())
     {
+        
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-        auto step_start = std::chrono::high_resolution_clock::now();
-
-        robot->step();
-
-        auto current_time = std::chrono::high_resolution_clock::now();
-        double elapsed_sec =
-            std::chrono::duration<double>(current_time - step_start).count();
-
-        double time_until_next_step = TIMESTEP - elapsed_sec;
-        if (time_until_next_step > 0.0)
+        while (d->time - sim_start< std::chrono::duration<double>(Clock::now() - cpu_start).count())
         {
-            auto sleep_duration = std::chrono::duration<double>(time_until_next_step);
-            std::this_thread::sleep_for(sleep_duration);
+            robot->step();
         }
+
     }
 }
