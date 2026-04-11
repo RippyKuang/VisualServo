@@ -16,6 +16,7 @@ class Simulate
 {
     friend class robot;
     friend class Window;
+
 private:
     void simThread();
     void physicThread();
@@ -24,6 +25,7 @@ private:
     std::thread physic_thread;
 
     const char *modelPath;
+    mjvCamera cam;
     const mjrRect camview = {0, 0, 640, 480};
 
     std::mutex buffer_mtx;
@@ -33,15 +35,18 @@ private:
     uint8_t *imgBuffer;
 
 protected:
-
     std::unique_ptr<Robot> robot;
     std::unique_ptr<Window> window;
 
 public:
     Simulate(const char *path) : modelPath(path)
     {
-        sim_thread = std::thread(&Simulate::simThread, this);
+
+        robot = std::make_unique<Robot>(modelPath);
+        robot->createCamera(cam, "endCamera");
+
         imgBuffer = new uint8_t[camview.width * camview.height * 3];
+        sim_thread = std::thread(&Simulate::simThread, this);
     }
 
     ~Simulate()
@@ -64,5 +69,9 @@ public:
         lock.unlock();
         cv::flip(m, m, 0);
         cv::cvtColor(m, m, cv::COLOR_BGR2RGB);
+    }
+    cv::Mat intrinsic(const char *name)
+    {
+        return robot->intrinsic(name, camview);
     }
 };

@@ -10,15 +10,16 @@ const Scalar upper(hmax, smax, vmax);
 
 Mat hsvMat, mask;
 
-void getCornerSubPix(Mat &rgbMat, std::vector<cv::Point2f> &corners, bool showImage)
+bool findKeyPoints(Mat &rgbMat, std::vector<cv::Point2f> &corners, bool showImage)
 {
     cvtColor(rgbMat, hsvMat, cv::COLOR_BGR2HSV);
     inRange(hsvMat, lower, upper, mask);
 
     goodFeaturesToTrack(mask, corners, kMaxCorners, kQualityLevel, kMinDistance);
+
     if (corners.size() != kMaxCorners)
     {
-        return;
+        return false;
     }
     if (showImage)
     {
@@ -31,4 +32,6 @@ void getCornerSubPix(Mat &rgbMat, std::vector<cv::Point2f> &corners, bool showIm
 
     TermCriteria criteria = TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 40, 0.001);
     cornerSubPix(mask, corners, Size(5, 5), Size(-1, -1), criteria);
+
+    return 1;
 }

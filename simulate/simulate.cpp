@@ -41,18 +41,14 @@ void Window::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 
 void Simulate::simThread()
 {
-
-    robot = std::make_unique<Robot>(modelPath);
+  
     window = std::make_unique<Window>();
 
     mjrContext mainCon;
-    mjvCamera cam;
+    mjr_defaultContext(&mainCon);
 
-    glfwMakeContextCurrent(window->getWindow());
     robot->makeContext(mainCon);
-
-    robot->createCamera(cam, "endCamera");
-
+    
     window->setWindowUserPointer(this);
     window->registerCallbacks();
 
@@ -60,8 +56,6 @@ void Simulate::simThread()
 
     while (!window->shouldClose())
     {
-
-        glfwMakeContextCurrent(window->getWindow());
         mjrRect viewport = {0, 0, 0, 0};
         window->getFramebufferSize(&viewport.width, &viewport.height);
 
