@@ -6,4 +6,4 @@ const double kQualityLevel = 0.1;
 const double kMinDistance = 1;
 
 
-bool findKeyPoints(cv::Mat &rgbMat, std::vector<cv::Point2f> &corners, bool showImage);
+bool findKeyPoints(cv::Mat &rgbMat, std::vector<cv::Point2f> &corners, bool debug);

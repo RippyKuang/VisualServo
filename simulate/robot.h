@@ -68,4 +68,5 @@ public:
     void moveCamera(int action, mjtNum reldx, mjtNum reldy);
     void makeContext(mjrContext &con);
     cv::Mat intrinsic(const char* name,const mjrRect& camView);
+    void getCamPose(cv::Mat& cam_mat,cv::Mat& cam_pos,const char* name);
 };

@@ -87,7 +87,7 @@ public:
         physic_thread.join();
     }
 
-    void getImage(cv::Mat &m)
+    void fetchFrameInfo(cv::Mat &m,cv::Mat& cam_mat,cv::Mat& cam_pos,const char* name)
     {
 
         std::unique_lock<std::mutex> lock(buffer_mtx);
@@ -103,8 +103,11 @@ public:
         image.copyTo(m);
         cv::flip(m, m, 0);
         cv::cvtColor(m, m, cv::COLOR_BGR2RGB);
+        
+        this->robot->getCamPose(cam_mat, cam_pos, name);
+
     }
-    
+
     cv::Mat intrinsic(const char *name)
     {
         return robot->intrinsic(name, camview);

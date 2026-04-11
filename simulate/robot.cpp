@@ -66,3 +66,14 @@ cv::Mat Robot::intrinsic(const char *name, const mjrRect& camView)
 
     return K;
 }
+
+void Robot::getCamPose(cv::Mat& cam_mat,cv::Mat& cam_pos,const char* name)
+{
+    int camID = mj_name2id(m, mjOBJ_CAMERA, name);
+     {
+        std::lock_guard<std::mutex> lock(sim_mtx);
+        cam_pos = cv::Mat(3, 1, CV_64F, d->cam_xpos + camID * 3).clone();
+        cam_mat = cv::Mat(3, 3, CV_64F, d->cam_xmat + camID * 9).clone();
+    }
+    
+}

@@ -4,6 +4,6 @@ include_directories("${PROJECT_BINARY_DIR}"
 		            "${CMAKE_CURRENT_SOURCE_DIR}"
 		            )
 
-add_library(vsc STATIC imgProcess.cpp)
+add_library(vsc STATIC imgProcess.cpp pbvs.cpp)
 
 target_link_libraries(vsc ${OpenCV_LIBS})
