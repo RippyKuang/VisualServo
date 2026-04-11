@@ -41,14 +41,14 @@ void Window::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 
 void Simulate::simThread()
 {
-  
+
     window = std::make_unique<Window>();
 
     mjrContext mainCon;
     mjr_defaultContext(&mainCon);
 
     robot->makeContext(mainCon);
-    
+
     window->setWindowUserPointer(this);
     window->registerCallbacks();
 
@@ -65,10 +65,15 @@ void Simulate::simThread()
         robot->updateCamera(camview, mainCon, cam);
 
         {
-            std::lock_guard<std::mutex> lock(buffer_mtx);
-            mjr_readPixels(imgBuffer, NULL, camview, &mainCon);
-            frame_ready = true;
-            cr.notify_all();
+            std::unique_lock<std::mutex> lock(buffer_mtx);
+            if (!doubleBuffer.ready)
+            {
+                mjr_readPixels(doubleBuffer.getWriteBuffer(), NULL, camview, &mainCon);
+                doubleBuffer.ready = true;
+                lock.unlock();
+                cr.notify_all();
+            }
+            
         }
 
         glfwPollEvents();
@@ -84,13 +89,12 @@ void Simulate::physicThread()
 
     while (!window->shouldClose())
     {
-        
+
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-        while (d->time - sim_start< std::chrono::duration<double>(Clock::now() - cpu_start).count())
+        while (d->time - sim_start < std::chrono::duration<double>(Clock::now() - cpu_start).count())
         {
             robot->step();
         }
-
     }
 }

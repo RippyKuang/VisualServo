@@ -48,7 +48,7 @@ bool findKeyPoints(Mat &rgbMat, std::vector<cv::Point2f> &corners, bool showImag
         imshow("corner Image", rgbMat);
         waitKey(1);
     }
-
+  
     TermCriteria criteria = TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 40, 0.001);
     cornerSubPix(mask, corners, Size(5, 5), Size(-1, -1), criteria);
 
