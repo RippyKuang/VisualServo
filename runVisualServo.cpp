@@ -23,7 +23,7 @@ int main(int argc, const char **argv)
     Vec3d body_vel, body_ang;
     Vec3d world_vel, world_ang;
 
-    PBVS_Control pbvs_ctrl(0.15, Vec3d{0, 0, 0.3});
+    PBVS_Control pbvs_ctrl(0.25, Vec3d{0, 0, 0.3});
 
     while (1)
     {

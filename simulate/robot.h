@@ -24,7 +24,8 @@ private:
     mjModel *m = NULL;
     mjData *d = NULL;
 
-    const doule Kp = 50;
+    const double Kp = 50;
+    
     cv::Vec3d target_v{0, 0, 0};
     cv::Vec3d target_w{0, 0, 0};
     int cam_id;
