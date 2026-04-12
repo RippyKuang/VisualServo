@@ -24,14 +24,15 @@ private:
     mjModel *m = NULL;
     mjData *d = NULL;
 
-    int nv;
-    cv::Vec3d target_v{0,0,0};
-    cv::Vec3d target_w{0,0,0};
+    const doule Kp = 50;
+    cv::Vec3d target_v{0, 0, 0};
+    cv::Vec3d target_w{0, 0, 0};
     int cam_id;
 
+    int nv;
+    cv::Mat Jp, Jr, J;
+
 public:
-
-
     Robot(const char *path)
     {
         scanPluginLibraries();
@@ -50,9 +51,10 @@ public:
         mjv_defaultScene(&scn);
 
         mjv_makeScene(m, &scn, 2000);
-    
+
         nv = m->nv;
-     
+        Jp = cv::Mat::zeros(3, nv, CV_64F);
+        Jr = cv::Mat::zeros(3, nv, CV_64F);
     }
 
     ~Robot()

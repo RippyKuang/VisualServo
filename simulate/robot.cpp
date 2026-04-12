@@ -14,42 +14,29 @@ void Robot::moveCamera(int action, mjtNum reldx, mjtNum reldy)
 void Robot::step()
 {
     std::lock_guard<std::mutex> lock(sim_mtx);
+
     mj_step1(m, d);
 
     int body_id = m->cam_bodyid[cam_id];
 
-    cv::Mat Jp = cv::Mat::zeros(3, nv, CV_64F);
-    cv::Mat Jr = cv::Mat::zeros(3, nv, CV_64F);
-
     mj_jacBody(m, d, Jp.ptr<double>(), Jr.ptr<double>(), body_id);
 
-    cv::Mat J;
     cv::vconcat(Jp, Jr, J);
 
-    cv::Mat V = (cv::Mat_<double>(6, 1) << target_v[0], target_v[1], target_v[2],
-                 target_w[0], target_w[1], target_w[2]);
+    cv::Vec6d V(target_v[0], target_v[1], target_v[2],
+                target_w[0], target_w[1], target_w[2]);
 
     cv::Mat J_pinv;
     cv::invert(J, J_pinv, cv::DECOMP_SVD);
     cv::Mat q_dot_target = J_pinv * V;
-  
-    double Kp = 50;
-  
-    for (int i = 0; i < nv; i++)
-    {
 
-        double q_acc_target = Kp * (q_dot_target.at<double>(i) - d->qvel[i]);
-        d->qacc[i] = q_acc_target;
-    }
+    for (int i = 0; i < nv; i++)
+        d->qacc[i] = Kp * (q_dot_target.at<double>(i) - d->qvel[i]);
 
     mj_inverse(m, d);
 
- 
     for (int i = 0; i < nv; i++)
-    {
-
         d->ctrl[i] = d->qfrc_inverse[i];
-    }
 
     mj_step2(m, d);
 }
