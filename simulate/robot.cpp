@@ -48,7 +48,7 @@ void Robot::updateScene(mjrRect viewport, mjrContext &con)
     mjr_render(viewport, &scn, &con);
 }
 
-cv::Mat Robot::intrinsic(const char *name, const mjrRect& camView)
+cv::Matx33d Robot::intrinsic(const char *name, const mjrRect& camView)
 {
     int camID = mj_name2id(m, mjOBJ_CAMERA, name);
     
@@ -67,7 +67,7 @@ cv::Mat Robot::intrinsic(const char *name, const mjrRect& camView)
     return K;
 }
 
-void Robot::getCamPose(cv::Mat& cam_mat,cv::Mat& cam_pos,const char* name)
+void Robot::getCamPose(cv::Matx33d& cam_mat,cv::Vec3d& cam_pos,const char* name)
 {
     int camID = mj_name2id(m, mjOBJ_CAMERA, name);
      {

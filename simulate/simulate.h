@@ -87,7 +87,7 @@ public:
         physic_thread.join();
     }
 
-    void fetchFrameInfo(cv::Mat &m,cv::Mat& cam_mat,cv::Mat& cam_pos,const char* name)
+    void fetchFrameInfo(cv::Mat &m,cv::Matx33d& cam_mat,cv::Vec3d& cam_pos,const char* name)
     {
 
         std::unique_lock<std::mutex> lock(buffer_mtx);
@@ -108,7 +108,7 @@ public:
 
     }
 
-    cv::Mat intrinsic(const char *name)
+    cv::Matx33d intrinsic(const char *name)
     {
         return robot->intrinsic(name, camview);
     }
