@@ -8,7 +8,7 @@ int main(int argc, const char **argv)
     Simulate simulate(argv[1]);
 
     const char *cameraName = "endCamera";
-    const std::vector<Vec3d> objectPoints= {{-0.05, -0.05, 0},{0.05, -0.05, 0},{0.05, 0.05, 0},{-0.05,0.05, 0}};
+    const std::vector<Vec3d> objectPoints = {{-0.05, -0.05, 0}, {0.05, -0.05, 0}, {0.05, 0.05, 0}, {-0.05, 0.05, 0}};
 
     std::vector<Point2f> corners;
     corners.reserve(kMaxCorners);
@@ -23,7 +23,7 @@ int main(int argc, const char **argv)
     Vec3d body_vel, body_angular;
     Vec3d spatial_vel, spatial_ang;
 
-    PBVS_Control pbvs_ctrl(0.5, Vec3d{0, 0, 0.3});
+    PBVS_Control pbvs_ctrl(0.15, Vec3d{0, 0, 0.3});
 
     while (1)
     {
@@ -34,18 +34,15 @@ int main(int argc, const char **argv)
         {
 
             solvePnP(objectPoints, corners, K, distCoeffs, rvec, tvec);
-  
 
-            pbvs_ctrl.forward(tvec, rvec, body_vel, body_angular); 
-            
+            pbvs_ctrl.forward(tvec, rvec, body_vel, body_angular);
+
+            std::cout << "tvec: " << tvec << std::endl;
             spatial_vel = cam_mat * body_vel;
-     
+
             spatial_ang = cam_mat * body_angular;
 
-   
-
-            simulate.ctrl(spatial_vel,spatial_ang,cameraName);
-
+            simulate.ctrl(spatial_vel, spatial_ang, cameraName);
         }
 
         corners.clear();

@@ -33,7 +33,7 @@ void Robot::step()
     cv::invert(J, J_pinv, cv::DECOMP_SVD);
     cv::Mat q_dot_target = J_pinv * V;
   
-    double Kp = 30;
+    double Kp = 50;
   
     for (int i = 0; i < nv; i++)
     {
