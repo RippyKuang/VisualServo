@@ -14,7 +14,44 @@ void Robot::moveCamera(int action, mjtNum reldx, mjtNum reldy)
 void Robot::step()
 {
     std::lock_guard<std::mutex> lock(sim_mtx);
-    mj_step(m, d);
+    mj_step1(m, d);
+
+    int body_id = m->cam_bodyid[cam_id];
+
+    cv::Mat Jp = cv::Mat::zeros(3, nv, CV_64F);
+    cv::Mat Jr = cv::Mat::zeros(3, nv, CV_64F);
+
+    mj_jacBody(m, d, Jp.ptr<double>(), Jr.ptr<double>(), body_id);
+
+    cv::Mat J;
+    cv::vconcat(Jp, Jr, J);
+
+    cv::Mat V = (cv::Mat_<double>(6, 1) << target_v[0], target_v[1], target_v[2],
+                 target_w[0], target_w[1], target_w[2]);
+
+    cv::Mat J_pinv;
+    cv::invert(J, J_pinv, cv::DECOMP_SVD);
+    cv::Mat q_dot_target = J_pinv * V;
+  
+    double Kp = 30;
+  
+    for (int i = 0; i < nv; i++)
+    {
+
+        double q_acc_target = Kp * (q_dot_target.at<double>(i) - d->qvel[i]);
+        d->qacc[i] = q_acc_target;
+    }
+
+    mj_inverse(m, d);
+
+ 
+    for (int i = 0; i < nv; i++)
+    {
+
+        d->ctrl[i] = d->qfrc_inverse[i];
+    }
+
+    mj_step2(m, d);
 }
 
 void Robot::makeContext(mjrContext &con)
@@ -48,10 +85,10 @@ void Robot::updateScene(mjrRect viewport, mjrContext &con)
     mjr_render(viewport, &scn, &con);
 }
 
-cv::Matx33d Robot::intrinsic(const char *name, const mjrRect& camView)
+cv::Matx33d Robot::intrinsic(const char *name, const mjrRect &camView)
 {
     int camID = mj_name2id(m, mjOBJ_CAMERA, name);
-    
+
     double fovy = m->cam_fovy[camID];
     double cx = camView.width / 2;
     double cy = camView.height / 2;
@@ -67,13 +104,20 @@ cv::Matx33d Robot::intrinsic(const char *name, const mjrRect& camView)
     return K;
 }
 
-void Robot::getCamPose(cv::Matx33d& cam_mat,cv::Vec3d& cam_pos,const char* name)
+void Robot::getCamPose(cv::Matx33d &cam_mat, cv::Vec3d &cam_pos, const char *name)
 {
     int camID = mj_name2id(m, mjOBJ_CAMERA, name);
-     {
+    {
         std::lock_guard<std::mutex> lock(sim_mtx);
         cam_pos = cv::Mat(3, 1, CV_64F, d->cam_xpos + camID * 3).clone();
         cam_mat = cv::Mat(3, 3, CV_64F, d->cam_xmat + camID * 9).clone();
     }
-    
+}
+
+void Robot::ctrl(const cv::Vec3d &target_v, const cv::Vec3d &target_w, const char *name)
+{
+    std::lock_guard<std::mutex> lock(sim_mtx);
+    this->target_v = target_v;
+    this->target_w = target_w;
+    this->cam_id = mj_name2id(m, mjOBJ_CAMERA, name);
 }

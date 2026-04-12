@@ -45,6 +45,9 @@ bool findKeyPoints(Mat &rgbMat, std::vector<cv::Point2f> &corners, bool debug)
         circle(rgbMat, corners[1], 3, Scalar(0, 255, 0), 2);
         circle(rgbMat, corners[2], 3, Scalar(0, 0, 255), 2);
         circle(rgbMat, corners[3], 3, Scalar(255, 255, 255), 2);
+
+        imshow("corners",rgbMat);
+        waitKey(1);
     }
 
     TermCriteria criteria = TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 40, 0.001);

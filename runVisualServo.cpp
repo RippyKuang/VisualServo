@@ -8,20 +8,13 @@ int main(int argc, const char **argv)
     Simulate simulate(argv[1]);
 
     const char *cameraName = "endCamera";
+    const std::vector<Vec3d> objectPoints= {{-0.05, -0.05, 0},{0.05, -0.05, 0},{0.05, 0.05, 0},{-0.05,0.05, 0}};
 
     std::vector<Point2f> corners;
-    std::vector<Vec3d> objectPoints;
-    std::vector<Vec3d> ptsInCamera;
-
-    objectPoints.emplace_back(0.0, -0.1, 0.1);
-    objectPoints.emplace_back(0.0, 0.1, 0.1);
-    objectPoints.emplace_back(0.0, 0.1, -0.1);
-    objectPoints.emplace_back(0.0, -0.1, -0.1);
-
     corners.reserve(kMaxCorners);
 
-    Matx33d K = simulate.intrinsic(cameraName);
-    Mat distCoeffs = cv::Mat::zeros(5, 1, CV_64F);
+    const Matx33d K = simulate.intrinsic(cameraName);
+    const Mat distCoeffs = cv::Mat::zeros(5, 1, CV_64F);
 
     Mat image;
     Matx33d wRc, cam_mat;
@@ -29,7 +22,8 @@ int main(int argc, const char **argv)
     Vec3d cam_pos, rvec, tvec;
     Vec3d body_vel, body_angular;
     Vec3d spatial_vel, spatial_ang;
-    PBVS_Control pbvs_ctrl(0.1, Vec3d{0.1, 0, 0});
+
+    PBVS_Control pbvs_ctrl(0.5, Vec3d{0, 0, 0.3});
 
     while (1)
     {
@@ -40,19 +34,21 @@ int main(int argc, const char **argv)
         {
 
             solvePnP(objectPoints, corners, K, distCoeffs, rvec, tvec);
-            Rodrigues(rvec, wRc);
+  
 
-            // for (int i = 0; i < kMaxCorners; i++)
-            //     ptsInCamera.push_back(wRc * objectPoints[i] + tvec);
-
-            pbvs_ctrl.forward(tvec, rvec, body_vel, body_angular); // out_vel ,body twist ,angular-before-linear
-
-            spatial_vel = tvec.cross(wRc * body_angular) + wRc * body_vel;
-            spatial_ang = wRc * body_angular;
+            pbvs_ctrl.forward(tvec, rvec, body_vel, body_angular); 
             
+            spatial_vel = cam_mat * body_vel;
+     
+            spatial_ang = cam_mat * body_angular;
+
+   
+
+            simulate.ctrl(spatial_vel,spatial_ang,cameraName);
+
         }
+
         corners.clear();
-        ptsInCamera.clear();
     }
     return 0;
 }

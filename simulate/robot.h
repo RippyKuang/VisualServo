@@ -24,7 +24,14 @@ private:
     mjModel *m = NULL;
     mjData *d = NULL;
 
+    int nv;
+    cv::Vec3d target_v{0,0,0};
+    cv::Vec3d target_w{0,0,0};
+    int cam_id;
+
 public:
+
+
     Robot(const char *path)
     {
         scanPluginLibraries();
@@ -43,6 +50,9 @@ public:
         mjv_defaultScene(&scn);
 
         mjv_makeScene(m, &scn, 2000);
+    
+        nv = m->nv;
+     
     }
 
     ~Robot()
@@ -67,6 +77,8 @@ public:
 
     void moveCamera(int action, mjtNum reldx, mjtNum reldy);
     void makeContext(mjrContext &con);
-    cv::Matx33d intrinsic(const char* name,const mjrRect& camView);
-    void getCamPose(cv::Matx33d& cam_mat,cv::Vec3d& cam_pos,const char* name);
+    cv::Matx33d intrinsic(const char *name, const mjrRect &camView);
+    void getCamPose(cv::Matx33d &cam_mat, cv::Vec3d &cam_pos, const char *name);
+
+    void ctrl(const cv::Vec3d &target_v, const cv::Vec3d &target_w, const char *name);
 };

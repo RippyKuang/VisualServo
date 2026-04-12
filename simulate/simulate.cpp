@@ -73,7 +73,6 @@ void Simulate::simThread()
                 lock.unlock();
                 cr.notify_all();
             }
-            
         }
 
         glfwPollEvents();
@@ -97,4 +96,9 @@ void Simulate::physicThread()
             robot->step();
         }
     }
+}
+
+void Simulate::ctrl(const cv::Vec3d &target_v, const cv::Vec3d &target_w, const char *name)
+{
+    this->robot->ctrl(target_v, target_w, name);
 }

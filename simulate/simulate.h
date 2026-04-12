@@ -59,7 +59,7 @@ private:
 
     const char *modelPath;
     mjvCamera cam;
-    const mjrRect camview = {0, 0, 640, 480};
+    const mjrRect camview = {0, 0, 1440, 1024};
 
     std::mutex buffer_mtx;
     std::condition_variable cr;
@@ -87,7 +87,7 @@ public:
         physic_thread.join();
     }
 
-    void fetchFrameInfo(cv::Mat &m,cv::Matx33d& cam_mat,cv::Vec3d& cam_pos,const char* name)
+    void fetchFrameInfo(cv::Mat &m, cv::Matx33d &cam_mat, cv::Vec3d &cam_pos, const char *name)
     {
 
         std::unique_lock<std::mutex> lock(buffer_mtx);
@@ -103,13 +103,20 @@ public:
         image.copyTo(m);
         cv::flip(m, m, 0);
         cv::cvtColor(m, m, cv::COLOR_BGR2RGB);
-        
-        this->robot->getCamPose(cam_mat, cam_pos, name);
 
+        this->robot->getCamPose(cam_mat, cam_pos, name);
+  
+        for(int i = 0;i<3;i++)
+        {
+            cam_mat.val[1+3*i] *= -1;
+            cam_mat.val[2+3*i] *= -1;
+        }
     }
 
     cv::Matx33d intrinsic(const char *name)
     {
         return robot->intrinsic(name, camview);
     }
+
+    void ctrl(const cv::Vec3d &target_v, const cv::Vec3d &target_w, const char *name);
 };
